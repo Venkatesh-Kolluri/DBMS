@@ -25,13 +25,19 @@ create table Employee
  Dept_No int not null,
 )
 
---altrer table to make column not null
+--alter table to make column not null
 alter table employee
 alter column Contact_No char(10) not null
 
 --alter table to add foreign Key 
 alter table employee 
 add foreign key (Dept_No) references department(Dept_No)
+
+alter table Employee
+drop constraint [FK__Employee__Dept_N__3F466844]
+
+alter table tablename
+add columnName varchar(50)
 
 --Inserting value into employee table
 
@@ -62,6 +68,13 @@ values(101,'Anvesh Patil','Male',27,'anvesh.patil@gmail.com',7894561230,40),
 (124,'Sahithi Molguri','Female',24,'sahithi789@gmail.com',8975612877,50),
 (125,'Akash Ghugal','Male',23,'akash.ghugal@gmail.com',9445876123,30);
 
+
+alter table Employee
+alter column Age varchar(2)
+
+alter table employee
+alter column Age int
+ 
 --Creating table Payroll
 create table Payroll
 (
@@ -79,6 +92,34 @@ values(1101,101,40,90000),(1102,102,30,120000),(1103,103,20,35000),(1104,104,20,
 (1116,116,30,55000),(1117,117,50,150000),(1118,118,50,70000),(1119,119,40,40000),(1120,120,40,85000),
 (1121,121,20,35000),(1122,122,20,40000),(1123,123,40,45000),(1124,124,50,50000),(1125,125,30,60000)
 
+alter table payroll
+drop column PF  
+
+select * from Payroll
+
+alter table payroll
+add PF float  null
+
+ update Payroll
+ set PF= 5000
+ where Emp_Id=124;
+
+ alter table Payroll
+ add Bonous float 
+
+ update Payroll
+ set Bonous=4000
+ where Emp_ID=116
+
+begin Tran
+Update Payroll
+set salary=100000
+where Emp_Id=101
+
+begin tran
+EXEC SP_Rename 'Employee.Emp_Id','EmpID','Column'
+
+rollback 
 
 --create table Alloted Equipments 
 create table Equipments
@@ -126,7 +167,6 @@ Dept_No int not null foreign Key (Dept_No) references Department(Dept_No),
 insert into Project2(Id,Emp_Id,Dept_No) values('P2-01',109,20),('P2-02',112,30),('P2-03',113,30),('P2-04',120,40),('P2-05',118,50),
 ('P2-06',116,30),('P2-07',117,50),('P2-08',122,20),('P2-09',123,40),('P2-10',114,10)
 
-
 select * from Department
 select * from Employee
 select * from Payroll
@@ -154,3 +194,114 @@ on Employee.Emp_Id=Project2.Emp_Id
 
 select * from Department right outer join Project2
 on Department.Dept_No=Project2.Dept_No
+
+Create PROCEDURE EmployeeDetails
+@City varchar(50),@Dept_No int
+As
+Begin
+select * From Department 
+where City= @City AND Dept_No=@Dept_No 
+End
+
+EXEC EmployeeDetails @City=Nagpur,@Dept_No=20
+
+Create PROCEDURE EmployeeInfo
+@Dept_No int
+As
+Begin
+select * From Employee 
+where  Dept_No=@Dept_No 
+End
+
+EXEC EmployeeInfo @Dept_No=30
+
+select count(*)
+from Employee
+
+select count(*)
+from Employee
+where Dept_No=40
+
+select count(*)
+from Payroll
+where salary>30000 AND salary < 70000
+
+select sum(Salary)
+from Payroll
+
+select sum(Salary),Dept_No
+from Payroll
+where salary>50000
+Group By Dept_No
+
+select Max(salary)
+from payroll
+
+select Max(salary)
+from payroll
+where Dept_No=40
+
+select Avg(Salary),Dept_No
+from Payroll
+Group by Dept_No
+
+Select UPPER(Emp_Email)
+from Employee
+
+Select LOWER(Ename)
+from Employee
+
+select Emp_Email,Len(Emp_Email)
+from Employee
+
+select Ename,Employee.Dept_No,GETDATE()
+from Employee,Department
+
+create function GetEmployee()
+Returns table
+As
+Return (Select * from Employee)
+
+Begin Tran
+create function UpdateDepartment()
+Returns  @Department table
+(Dept_No int,DName varchar(50),City varchar(50)) 
+AS
+Begin
+insert into @Department
+Select Department.Dept_No,Department.DName,Department.City From Department 
+Update @Department Set Dept_No=100,DName='FullStack Developer',City='Hyderabad' where Dept_No=30
+Return 
+End
+
+create function Addition(
+@Num1 int,
+@Num2 int
+)
+Returns int
+As
+Begin
+return @Num1+@Num2
+End
+
+create function Concate(
+@sentence varchar(50),
+@sentence2 varchar(50)
+)
+Returns varchar(100)
+As
+Begin
+return @sentence+@sentence2
+End
+
+select dbo.Addition(1000,2000) As Sum
+select dbo.Concate('Hello World',' Welcome') As Concatination
+
+
+select * from UpdateDepartment()
+select * from Department
+select * From GetEmployee()
+drop function UpdateDepartment
+
+
+select* From Employee
