@@ -1,4 +1,4 @@
---Creating database
+﻿--Creating database
 Create database EmployeeManagement
 
 --Create Department Table in EmployeeManagement database
@@ -177,43 +177,6 @@ select * from Project2
 select * from Employee Right outer join Payroll
 on Employee.Emp_Id=Payroll.Emp_Id
 
-select * from Department Right outer join Payroll
-on Department.Dept_No=Payroll.Dept_No
-
-select * from Employee full outer join Equipments
-on Employee.Dept_No=Equipments.Dept_No
-
-select * from Department full outer join Equipments
-on Department.Dept_No=Equipments.Dept_No
-
-select * from Employee left outer join Project1
-on Employee.Emp_Id=Project1.Emp_Id
-
-select * from Employee left outer join Project2
-on Employee.Emp_Id=Project2.Emp_Id
-
-select * from Department right outer join Project2
-on Department.Dept_No=Project2.Dept_No
-
-Create PROCEDURE EmployeeDetails
-@City varchar(50),@Dept_No int
-As
-Begin
-select * From Department 
-where City= @City AND Dept_No=@Dept_No 
-End
-
-EXEC EmployeeDetails @City=Nagpur,@Dept_No=20
-
-Create PROCEDURE EmployeeInfo
-@Dept_No int
-As
-Begin
-select * From Employee 
-where  Dept_No=@Dept_No 
-End
-
-EXEC EmployeeInfo @Dept_No=30
 
 select count(*)
 from Employee
@@ -262,7 +225,6 @@ Returns table
 As
 Return (Select * from Employee)
 
-Begin Tran
 create function UpdateDepartment()
 Returns  @Department table
 (Dept_No int,DName varchar(50),City varchar(50)) 
@@ -283,7 +245,7 @@ As
 Begin
 return @Num1+@Num2
 End
-
+ 
 create function Concate(
 @sentence varchar(50),
 @sentence2 varchar(50)
@@ -305,3 +267,233 @@ drop function UpdateDepartment
 
 
 select* From Employee
+
+
+select Ename,Avg(salary),sum(12*salary) as annualSalary
+from Employee,Payroll
+
+
+select  difference('JoiningDate',getdate()) 
+as experience from employee
+
+select Ename,SUBSTRING(Ename,3,6)
+from employee
+where EName='Anvesh Patil'
+
+select concat(Ename,Emp_Email) as fullName
+from Employee
+
+select  max(Len(EName)) as NameLength
+from Employee
+
+select Month(getdate()) as months
+from Employee
+select Year(getdate())
+from Employee
+
+
+create function Fn_NumberSquare(@Num int)
+returns int
+As
+Begin
+Return ( @Num*@Num)
+End
+
+create function Fn_Division(@Num1 int,@Num2 int,@Num3 int)
+returns float
+As 
+Begin
+Return ((@Num1 / @Num2 )/@Num3)
+End
+
+select dbo.Fn_Division(100,10,5) as AfterDivision
+Select dbo.Fn_NumberSquare(25) as SquareValue
+
+create function Fn_CheckVotersEligibility(@Num int)
+returns varchar(100)
+As 
+Begin
+ declare @str varchar(100)
+ if @num >= 18
+ Begin
+     set @str='You Are eligible for voting' 
+ End
+ else
+ Begin
+    set @str='Candidate is not eligible for voting'
+ End
+ return @str
+End
+
+select dbo.Fn_CheckVotersEligibility(52)
+select dbo.Fn_CheckVotersEligibility(15)
+
+
+
+select * from Employee left outer join Payroll
+on Employee.Emp_Id=Payroll.Emp_Id
+
+select * from Department Left outer join Payroll
+on Department.Dept_No=Payroll.Dept_No
+
+select * from Employee full outer join Equipments
+on Employee.Dept_No=Equipments.Dept_No
+
+select * from Department full outer join Equipments
+on Department.Dept_No=Equipments.Dept_No
+
+select * from Employee left outer join Project1
+on Employee.Emp_Id=Project1.Emp_Id
+
+select * from Employee right outer join Project1
+on Employee.Emp_Id=Project1.Emp_Id
+
+select * from Employee left outer join Project2
+on Employee.Emp_Id=Project2.Emp_Id
+
+select * from Employee inner join Project1
+on Employee.Emp_Id=Project1.Emp_Id
+
+create index In_NumberIndex
+on Payroll(salary asc)
+
+select * from Payroll
+where salary > 40000 and salary<100000
+
+drop index In_NOIndex on Payroll
+
+create index IN_dpetNo
+on Employee(Dept_no asc)
+
+select * from Employee
+where Dept_no >=40
+
+
+stored procedure, views and CTE
+
+
+
+select Employee.Dept_No,count(Emp_Id) 
+from Employee INNER jOIN Department
+on Department.Dept_No=Employee.Dept_No
+group by Employee.dept_No
+
+select Ename,min(hiredate) as earlisthiredate,department 
+from employee left outer join Departments
+on Department.DepartmentID=Employee.DepartmentID
+
+select 
+
+--Stored Procedure
+
+Create PROCEDURE spEmployeeDepartment
+@City varchar(50),@Dept_No int
+As
+Begin
+select * From Department 
+where City= @City AND Dept_No=@Dept_No 
+End
+
+Create PROCEDURE spEmployeeDetails
+@Dept_No int
+As
+Begin
+select * From Employee 
+where  Dept_No=@Dept_No 
+End
+
+EXEC spEmployeeDetails @Dept_No=30
+EXEC spEmployeeDepartment @City=Nagpur,@Dept_No=20
+
+Drop procedure spEmployeeDetails
+Drop procedure spEmployeeDepartment
+
+create Procedure spTableDetails
+As
+Begin
+select * From Employee
+Select * from Department
+select * from Payroll
+End
+Exec spTableDetails
+
+--stored procedure with try catch block
+create procedure spDivision
+(@num1 decimal,@num2 decimal,@num3 decimal,@sum decimal output)
+As
+Begin 
+ Begin try
+    set @sum=(@num1/@num2)/@num3 
+ end try
+ Begin Catch
+      Select 
+	    ERROR_LINE() as ErrorLine, --returns the line number on which exception occured
+		ERROR_Number() as ErrorNumber, --return the number of the error that occured
+		ERROR_MESSAGE() as ErrorMessage, --return the complete text of the generated error message
+		ERROR_PROCEDURE() as ErrorProcedure, --returns the stored procedure or trigger where the error occured
+		ERROR_SEVERITY() as ErrorSeverity,  --returns the severity level of the error that occured
+		ERROR_STATE() as ErrorState --returns the state number of the error that occured
+
+ End Catch
+End
+
+Declare @result decimal
+Exec spDivision 130,65,0, @result output;
+Print @result
+
+drop procedure spDivision
+
+--creating views
+
+create view EmployeeDeptNo
+As
+select Ename,Dept_No
+from Employee
+where Dept_No<30
+
+create view EmpPayroll
+As
+Select Employee.Emp_Id,ename,salary
+from Payroll inner join Employee
+on payroll.Emp_Id=Employee.Emp_Id and salary < 50000
+
+drop view EmpPayroll
+select * from EmpPayroll
+select *  from EmployeeDeptNo
+
+--creating CTE
+ 
+ with New_CTE
+ as
+ (
+   select * from Employee where gender='Male' --CTE Defination
+ ) 
+ select * from New_CTE  --use insert,delete,select,update immediately after creating CTE if not used CTE will be destroyed
+
+ drop with New_CTE
+
+  with New_CTE
+ as
+ (
+   select * from Employee where gender='Male'
+ ) 
+ select * from New_CTE where age >=26
+
+  with New_CTE(Emp_Id,EName,Gender,Age,DeptNo)
+ as
+ (
+   select Emp_Id,Ename,Gender,Age,Dept_No from Employee where gender='Male'
+ ) 
+ select Emp_Id,Ename,Gender,Age,DeptNo from New_CTE
+
+
+ with New_CTE
+ as
+ (
+   select * from Employee 
+ ) 
+ insert New_CTE values(126,'Naresh J','Male',23,'naresh123@gmail.com',6547891234,20)
+ select * from New_CTE
+
+
+ select * from Employee
