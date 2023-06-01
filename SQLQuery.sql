@@ -176,7 +176,8 @@ select * from Project2
 
 select * from Employee Right outer join Payroll
 on Employee.Emp_Id=Payroll.Emp_Id
-
+select * from Employee where Ename like 'A%'
+ 
 
 select count(*)
 from Employee
@@ -208,14 +209,40 @@ select Avg(Salary),Dept_No
 from Payroll
 Group by Dept_No
 
-Select UPPER(Emp_Email)
-from Employee
+Select UPPER(Emp_Email) from Employee
 
-Select LOWER(Ename)
-from Employee
+Select LOWER(Ename) from Employee
 
-select Emp_Email,Len(Emp_Email)
-from Employee
+select Emp_Email,Len(Emp_Email) from Employee
+
+select Ename,ascii(Ename) as Asciivalue from Employee 
+
+select Emp_ID,char(Emp_ID) as charvalue from employee
+select Ename,DIFFERENCE(22/10/21,getdate()) as DifferenceValue from Employee
+
+select Emp_Email,left(Emp_email,5) as email from Employee
+select Ename,left(Ename,3) as EmpEname from Employee
+
+select Emp_Email,TRIM(Emp_Email) from Employee
+
+select Ename,Replace(Ename,'Shruti','Shivani') from Employee
+select Ename,Replicate(Ename,2) from Employee
+select Ename,Reverse(Ename)  as ReversedEname from Employee
+select Emp_Email,Right(Emp_Email,10) from Employee
+select Ename,Str(Emp_ID) from Employee
+select Emp_Email,SubString(Emp_email,5,9) as EmailSubstring from Employee
+select Ename,SubString(Ename,2,7) from Employee
+
+select DATEADD(Day,3,'2023/05/29') from Employee
+select DateDiff(year,'2019/05/26',getdate()) from Employee
+select Datename(month,'2023/05/25') from Employee
+select DatePart(month,'2023/05/25') from Employee
+
+select Day('2023/05/25') from Employee
+select GETUTCDATE() from Employee
+select getDate() from Employee
+
+
 
 select Ename,Employee.Dept_No,GETDATE()
 from Employee,Department
@@ -269,8 +296,8 @@ drop function UpdateDepartment
 select* From Employee
 
 
-select Ename,Avg(salary),sum(12*salary) as annualSalary
-from Employee,Payroll
+select Avg(salary) as averagesalary,sum(12*salary) as annualSalary
+from Payroll
 
 
 select  difference('JoiningDate',getdate()) 
@@ -296,7 +323,7 @@ create function Fn_NumberSquare(@Num int)
 returns int
 As
 Begin
-Return ( @Num*@Num)
+Return (@Num*@Num)
 End
 
 create function Fn_Division(@Num1 int,@Num2 int,@Num3 int)
@@ -354,6 +381,8 @@ on Employee.Emp_Id=Project2.Emp_Id
 select * from Employee inner join Project1
 on Employee.Emp_Id=Project1.Emp_Id
 
+-------------------------------creating indexes-------------------------------------------------------------------------------------
+
 create index In_NumberIndex
 on Payroll(salary asc)
 
@@ -384,7 +413,7 @@ on Department.DepartmentID=Employee.DepartmentID
 
 select 
 
---Stored Procedure
+-------------------------------------Creating Stored Procedure----------------------------------------------------------------
 
 Create PROCEDURE spEmployeeDepartment
 @City varchar(50),@Dept_No int
@@ -417,7 +446,8 @@ select * from Payroll
 End
 Exec spTableDetails
 
---stored procedure with try catch block
+--------------------------stored procedure with try catch block-------------------------------------------------------- 
+
 create procedure spDivision
 (@num1 decimal,@num2 decimal,@num3 decimal,@sum decimal output)
 As
@@ -443,7 +473,7 @@ Print @result
 
 drop procedure spDivision
 
---creating views
+------------------------------------creating views-----------------------------------------------------------------------------
 
 create view EmployeeDeptNo
 As
@@ -461,7 +491,7 @@ drop view EmpPayroll
 select * from EmpPayroll
 select *  from EmployeeDeptNo
 
---creating CTE
+-------------------------------------Creating CTE--------------------------------------------------------------------------------
  
  with New_CTE
  as
@@ -497,3 +527,552 @@ select *  from EmployeeDeptNo
 
 
  select * from Employee
+
+ create procedure spEmployeeHiredate
+ @date date,@date2 date ,@EmpId int
+ As
+ Begin
+   select  EmpID,Ename DeptNo,hiredate 
+   from Department inner join Employee
+   on Department.DeptNo=Employee.DeptNo
+   where EmpID=@EmpId or (hiredate> @date And hiredate<=@date2)
+ End
+
+ CREATE PROCEDURE spGetEmployeesByIDOrHiredBetweenDates
+    @EmployeeID INT,
+    @StartDate DATE,
+    @EndDate DATE
+AS
+BEGIN
+    SELECT * FROM Employees
+    WHERE EmployeeID = @EmployeeID OR (HireDate BETWEEN @StartDate AND @EndDate);
+END;
+
+
+subquery, triggers and cursors
+
+Create table StudentDetails
+(
+StuId int primary key not null,
+SName varchar(50) not null,
+Age int not null,
+Gender char(6) not null,
+Class int not null
+)
+drop table StudentDetails
+
+insert into StudentDetails(StuId,SName,Age,Gender,class)
+values(101,'Anvesh Patil',15,'Male',10),
+(102,'Satish Akula',13,'Male',8),
+(103,'Pavan Jawlekar',10,'Male',6),
+(104,'Ankita Radke',15,'Female',10),
+(105,'Shreya Sharma',12,'Female',7)
+
+select * from StudentDetails
+
+-----------------------------Creating triggers-----------------------------------------------------------------------
+
+---------------------------DML Triggers-----------------------------------
+-----------trigger Afteinsert  ------------
+
+create trigger trStudentInsert
+on StudentDetails
+after insert 
+As
+Begin
+  print 'Inserted data into the table' 
+End
+
+insert into StudentDetails(StuId,SName,Age,Gender,class)
+values(106,'Rahul Patil',14,'Male',9) 
+delete from StudentDetails where StudId=106
+
+drop trigger trStudentInsert
+
+create trigger trStudentInsert
+on StudentDetails
+after insert 
+As
+Begin
+  select * from inserted 
+End
+
+
+select * from StudentDetails
+
+-------------------------------trigger delete----------------------------------------------------------------- 
+
+create trigger trStudentDelete
+on StudentDetails
+with Encryption
+after Delete 
+As
+Begin
+  print 'deleted data from the table' 
+End
+
+Exec Sp_HelpText [trStudentDelete]
+Exec Sp_HelpText[trStudentInsert]
+
+delete from StudentDetails where StuId=106
+drop trigger trStudentDelete
+
+create trigger trStudentDelete
+on StudentDetails
+after Delete 
+As
+Begin
+  select * from deleted 
+End
+
+select * from StudentDetails
+
+---------------------trigger Update----------------------------------
+
+create trigger trStudentUpdate
+on StudentDetails
+after Update
+As
+Begin
+  print 'Date in the table is updated'
+End
+
+
+insert into StudentDetails(StuId,SName,Age,Gender,class)
+values(106,'Rahul Patil',14,'Male',9)
+
+update StudentDetails
+set Sname='Sai Sudarshan',Age=13,Gender='Male',Class=9
+where stuId=106
+
+delete from StudentDetails where StuId=106
+drop trigger trStudentUpdate
+
+create trigger trStudentUpdate
+on StudentDetails
+after Update
+As
+Begin
+  select * from inserted
+  select * from deleted
+End
+
+------------------Trigger Insted Of Insert----------------------------------------------
+
+create trigger trStudentInsert
+on StudentDetails
+instead of insert 
+As
+Begin
+  print 'You are not allowed to insert data in the table' 
+End
+
+Drop Trigger trStudentInsert
+
+create trigger trStudentInsert
+on StudentDetails
+instead of insert 
+As
+Begin
+  Rollback
+  print 'You are not allowed to insert data in the table' 
+End
+
+insert into StudentDetails(StuId,SName,Age,Gender,class)
+values(106,'Rahul Patil',14,'Male',9)
+delete from StudentDetails where StudId=106
+
+
+-------------------------Trigger Insted of Delete-----------------------------------------------------
+
+create trigger trStudentDelete
+on StudentDetails
+instead of Delete
+As
+Begin
+  print 'You are not allowed to Delete data in the table' 
+End
+
+Drop Trigger trStudentDelete
+delete from StudentDetails
+
+create trigger trStudentDelete
+on StudentDetails
+instead of Delete 
+As
+Begin
+  Rollback
+  print 'You are not allowed to Delete the data from the table' 
+End
+
+---------------------------Trigger insted of Update---------------------------------------------
+
+create trigger trStudentUpdate
+on StudentDetails
+instead of Update
+As
+Begin
+  print 'You are not allowed to update the data in the table' 
+End
+
+Drop Trigger trStudentUpdate
+delete from StudentDetails
+update StudentDetails set SName='Prashant' where StuId=105 
+
+create trigger trStudentUpdate
+on StudentDetails
+instead of Update
+As
+Begin
+  Rollback
+  print 'You are not allowed to update the data from the table' 
+End
+
+----------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------Creating DDL Trigers-----------------------------------------------------------------------
+
+create database StudentDb
+use StudentDb
+
+create trigger trCreateTable
+on database
+for Create_Table
+As
+Begin
+  print 'New Table Created'
+End
+
+Create table Student(ID int)
+drop trigger trCreateTable
+Drop table Student
+
+create trigger trAlterTable
+on database
+for Alter_Table
+As
+Begin
+  print 'You have altered the table'
+End
+
+alter table student
+add StudentName varchar(50) not null
+drop table Student
+
+create trigger trDropTable
+on database
+for Drop_Table
+As
+Begin
+  print 'You have Droped the table'
+End
+
+------------------------------------------------------------------------------------------------------------------
+-----------------------------------------SubQuery--------------------------------------------------------------
+
+select * from Employee
+where Emp_Id = (select Emp_Id from Employee
+                 where EName='Satish Akula')
+
+select * from Employee
+where Emp_Id in (select Emp_Id  from Payroll
+                 where Salary > 60000)
+
+select * from Department
+where Dept_No in (Select Dept_No from Payroll
+                  where salary >60000)
+
+select * from Employee inner join Department
+on Employee.Dept_No=Department.Dept_No 
+where Employee.Dept_No in (select Dept_No from Department
+                           where City='Hyderabad')
+
+						   
+select E.*,D.DName,D.City from Employee E inner join Department D
+on E.Dept_No=D.Dept_No 
+where E.Dept_No in (select Dept_No from Department
+                           where City='Bangaluru')
+
+
+--------------------------------------******CURSOR*******--------------------------------------------------
+
+select * from Employee
+
+------------Without Cursor Variable----------------
+Declare MyCursor cursor scroll for select * from Employee
+
+Open MyCursor 
+fetch first from MyCursor
+fetch next from MyCursor
+fetch prior from MyCursor
+fetch last from MyCursor
+fetch absolute 5 from MyCursor
+fetch relative 3 from MyCursor
+Close MyCursor
+deallocate MyCursor
+
+------------With Cursor Variable----------------
+Declare MyCursor cursor scroll for select Emp_id,Emp_email from Employee
+Declare @EmpId int,@Email varchar(50)
+Open MyCursor 
+fetch first from MyCursor into @EmpID,@Email
+print 'Employees Id is '+cast(@EmpID as varchar(10))+' and Email is '+@Email 
+fetch next from MyCursor into @EmpID,@Email
+print 'Employees Id is '+cast(@EmpID as varchar(10))+' and Email is '+@Email 
+fetch prior from MyCursor into @EmpID,@Email
+print 'Employees Id is '+cast(@EmpID as varchar(10))+' and Email is '+@Email 
+fetch last from MyCursor into @EmpID,@Email
+print 'Employees Id is '+cast(@EmpID as varchar(10))+' and Email is '+@Email 
+fetch absolute 5 from MyCursor into @EmpID,@Email
+print 'Employees Id is '+cast(@EmpID as varchar(10))+' and Email is '+@Email 
+fetch relative 3 from MyCursor into @EmpID,@Email
+print 'Employees Id is '+cast(@EmpID as varchar(10))+' and Email is '+@Email 
+Close MyCursor
+deallocate MyCursor
+
+
+Locks, Sql Server Profiler
+Query Optimization
+sql logging
+
+select * from Employee where Gender='Male' AND Age>=26
+
+  with New_CTE
+ as
+ (
+   select * from Employee where gender='Male'
+ ) 
+ select * from New_CTE where age >=20
+
+  set statistics io,time on
+ select max(salary) From EMployee E inner join Payroll D
+ on E.Dept_No=D.Dept_No 
+ group by Salary
+
+
+ Select * from Department
+ select * from Payroll
+ select * from Project1
+
+ select * from sys.dm_tran_locks
+ 
+select * from Emoloyee
+where Dept_No in (Select Dept_No from Department
+                  where department_name=sales)
+
+select * from employee
+	
+	select * from employees where salary>=(select avg(salary) 
+	from employees where dept_name='finance')
+
+select * from Employee
+where Dept_Id in (select Dept_Id,avg(salary) 
+from Departmen
+
+select avg(salary) as salary from employees 
+where department_id =(select dept_id 
+from department where dept_name='HR')
+
+create trigger trStudentInsert
+on StudentDetails
+after insert 
+As
+Begin
+ insert into StudentDetails(StuId,SName,Age,Gender,class)
+ values(106,'Rahul Patil',14,'Male',9)
+End
+
+insert into StudentDetails(StuId,SName,Age,Gender,class)
+values(106,'Rahul Patil',14,'Male',9)
+delete from StudentDetails where StudId=106
+
+drop trigger trStudentInsert
+
+select * From StudentDetails
+
+create trigger insert_salary
+BEFORE insert on Employees
+for each row
+Begin
+  Declare min_salary DECIMAL(10,2) DEFAULT 5000.00
+  
+  if .salary < min_salary THEN
+    SET NEW.salary = min_salary
+  END IF
+END
+
+
+
+
+
+Create trigger UpdateSalaryThreshold
+ON Employees
+After insert
+AS
+Begin
+update Employees
+set Salary = Case
+             When Salary < @MinimumSalaryThreshold then @MinimumSalaryThreshold
+             else Salary
+             end
+  Where EmployeeID IN (Select EmployeeID From inserted)
+end
+
+
+Create table Students
+(
+StuId int primary key not null,
+SName varchar(50) not null,
+)
+drop table StudentCourse
+
+insert into Students(StuId,SName)
+values(101,'Anvesh'),(102,'Pavan'),(103,'Ankita')
+select * from Students
+
+Create table StudentCourse
+(
+StuId int foreign key references Students(StuId),
+Course varchar(50) not null,
+)
+drop table StudentCourse
+
+insert into StudentCourse(StuId,Course)
+values(101,'C++'),(101,'Java'),(102,'DBMS'),(103,'DotNet'),(103,'C')
+
+select * from StudentCourse
+Create table StudentDetail
+(
+StuId int not null,
+SName varchar(50),
+Course varchar(50) not null,
+)
+drop table StudentCourse
+
+insert into StudentDetail(StuId,SName,Course)
+values(101,'Anvesh','C++'),(101,'Anvesh','Java'),(102,'Pavan','DBMS'),(103,'Ankita','DotNet'),(103,'Ankita','C')
+
+normalization, acid properties
+
+
+-----------------------*************Normalization**************-------------------------------------------------
+--Database Normalization is the process of organizing data to minimize data redundancy(data duplication) 
+--which leds to data in consistency
+
+--Databse normalization is a step by step process,there are 6  nornaml forms,
+--First Normal form (1NF) to sixth Form(6NF)
+---most databses are in third Normal Form(3NF)
+---there are certain rules,that each normal form should follow
+
+-----------FIRST NORMAL FORM--------------------------------
+
+--A table is said to be in First Normal Form when
+ --1) The data in each column should have atomic value,no multiple values seperated by comma
+ --2) The table does not contain any repeating column groups
+ --3) Identify each record uniquely using primary key
+
+ select * from StudentDetail
+ select * from Students 
+ select * from StudentCourse
+
+-----------SECOND NORMAL FORM--------------------------------
+--The table is said to be in 2Nf,if
+--1) The table meets all the conditions of first normal form
+--2) there are no partial Dependency means a non-key attribute should not be
+  --partial dependency means a non-key attribute should not be partially dependent on more than one key attribute
+--3)move redundant data to a seperate table
+--4) Create relationship between these table using foreign keys
+
+select E.*,D.DName,D.City from Employee E inner join Department D
+on E.Dept_No=D.Dept_No
+
+Select * from Employee 
+select * from Department
+
+--------------------------THIRD NORMAL FORM------------------------------------------------
+--A table is said to be in third normal form
+--1) Meets all the condition of first normal form and second normal form
+--2) The tables should not have Transitive Dependencies in them
+----a) Does not contain columns(Attribute) that are not fully dependent on the primary key
+----b) If an attribute can be determined by another non-key attribute,it is called a transitive dependency
+----c) To make it simpler,Every non-key attribute should be determined by the key attribute only
+----d) If a non-key attribute can be determined by another non-key attribute,it needs to put into another table
+
+select E.*,P.Salary,P.salary*12 as annualSalary from Employee E inner join Payroll P
+on E.Emp_Id=P.Emp_Id
+
+select * from Employee
+select Emp_ID,Salary,Salary*12 as annualSalary from Payroll P
+
+----------------*********Boyce-Codd Normal Form(BCNF)*********----------------------------
+
+--BCNF is the extension of 3NF.It is stricter than 3NF
+--A table is in BCNF if every functional Dependency X -> Y,X is the super key of the table.
+--For BCNF, the table should be in 3NF, and for every FD, LHS is super key
+
+select E.Emp_Id,E.Ename,D.Dept_No,D.DName,D.City from Employee E inner join Department D
+on E.Dept_No=D.Dept_No
+
+select Emp_Id,Ename from Employee
+select Dept_No,Dname,City from Department
+select E.Emp_ID,D.Dept_No from Employee E inner join Department D
+on E.Dept_No=D.Dept_No
+
+--Candidate Keys
+--for first table Emp_Id
+--for second table : Dept_No
+--for third table: {Emp_ID,Dept_No}
+--this is in BCNF because left side part of both the functional dependencies is a key
+
+
+-------------****************Transactions********----------------------------
+
+begin tran
+update Employee
+set Ename='Naveen'
+where Emp_Id=124
+delete from Employee where Emp_Id=126
+
+commit tran
+Rollback tran
+
+select * from Employee
+
+
+what is an API?-- 
+difference between .net and .net core.
+Asp .net core web API - project
+
+3 tier architecture- Business Layer
+			2. Common Layer
+			3. REpository Layer
+Dependency Injection in ASp .net core
+
+Check the diffrence in service life time hooks (addsingleton, addscooped, addtransient)
+
+Startup.cs file-configure service vs configure
+Routing
+Middleware
+Authentication VS authorization
+RESTful HTTP services
+http verbs
+Entity framework-Code first approach
+POstman
+IIS Express
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
